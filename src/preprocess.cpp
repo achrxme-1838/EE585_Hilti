@@ -84,7 +84,7 @@ void Preprocess::process(const sensor_msgs::PointCloud2::ConstPtr &msg, PointClo
 
   case HESAI:
     hesai_handler(msg);
-  break;
+    break;
 
   
   default:
@@ -485,7 +485,8 @@ void Preprocess::sim_handler(const sensor_msgs::PointCloud2::ConstPtr &msg) {
     }
 }
 
-void Preprocess::hesai_handler(const sensor_msgs::PointCloud2::ConstPtr &msg) {
+void Preprocess::hesai_handler(const sensor_msgs::PointCloud2::ConstPtr &msg) 
+{
 
     std::cout << "Hesai handler" << std::endl;
     pl_surf.clear();
@@ -531,7 +532,6 @@ void Preprocess::hesai_handler(const sensor_msgs::PointCloud2::ConstPtr &msg) {
         added_pt.curvature = (float)(pl_orig.points[i].timestamp - smallest_time) * 1000.0; // 
         pl_surf.points.push_back(added_pt);
     }
-
 }
 
 
