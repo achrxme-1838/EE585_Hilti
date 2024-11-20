@@ -280,5 +280,10 @@ Source:
 
 /root/ros_ws/src/EE585_Hilti/launch/auto_run_3_exps.sh
 
-Note: there are some absolute paths in auto_run_3_exps.sh & each .launch & 
+Note: there are some absolute paths in 
+
+auto_run_3_exps.sh
+
+each .launch & 
+
 std::string pose_path = "/root/ros_ws/src/EE585_Hilti/Log/odom_result/" + bag_name + ".txt"; (in laserMapping.cpp)
