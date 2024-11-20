@@ -987,6 +987,19 @@ int main(int argc, char** argv)
             // publish_effect_world(pubLaserCloudEffect);
             // publish_map(pubLaserCloudMap);
 
+
+            std::ofstream ofs;
+            std::string pose_path = "/root/ros_ws/src/EE585_Hilti/Log/odom_result/pose_data.txt";
+
+            // std::string directory = "/root/ros_ws/src/EE585_Hilti/Log/odom_result";
+            // std::filesystem::create_directories(directory);
+            // std::string pose_path = directory + "/pose_data.txt";
+
+            ofs.open(pose_path, std::ios::app);
+            ofs<< std::fixed << std::setprecision(15) << lidar_end_time << " " << state_point.pos.x() << " " << state_point.pos.y() << " " << state_point.pos.z() << " " << geoQuat.x << " " << geoQuat.y << " " << geoQuat.z << " " << geoQuat.w << std::endl;
+            ofs.close();
+
+
             /*** Debug variables ***/
             if (runtime_pos_log)
             {
