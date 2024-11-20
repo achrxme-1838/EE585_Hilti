@@ -273,3 +273,12 @@ The main structure of this UAV is 3d printed (Aluminum or PLA), the .stl file wi
 ## 6.Acknowledgments
 
 Thanks for LOAM(J. Zhang and S. Singh. LOAM: Lidar Odometry and Mapping in Real-time), [Livox_Mapping](https://github.com/Livox-SDK/livox_mapping), [LINS](https://github.com/ChaoqinRobotics/LINS---LiDAR-inertial-SLAM) and [Loam_Livox](https://github.com/hku-mars/loam_livox).
+
+
+## Automate
+Source:
+
+/root/ros_ws/src/EE585_Hilti/launch/auto_run_3_exps.sh
+
+Note: there are some absolute paths in auto_run_3_exps.sh & each .launch & 
+std::string pose_path = "/root/ros_ws/src/EE585_Hilti/Log/odom_result/" + bag_name + ".txt"; (in laserMapping.cpp)
