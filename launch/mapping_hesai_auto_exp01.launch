@@ -1,7 +1,7 @@
 <launch>
 <!-- Launch file for Livox AVIA LiDAR -->
 
-	<arg name="rviz" default="true" />
+	<arg name="rviz" default="false" />
 
 	<!-- <rosparam command="load" file="$(find fast_lio)/config/avia.yaml" /> -->
 	<rosparam command="load" file="$(find fast_lio)/config/hesai.yaml" />
@@ -14,10 +14,13 @@
 	<param name="filter_size_map" type="double" value="0.5" />
 	<param name="cube_side_length" type="double" value="1000" />
 	<param name="runtime_pos_log_enable" type="bool" value="0" />
-    <node pkg="fast_lio" type="fastlio_mapping" name="laserMapping" output="screen" /> 
+	
+	<param name="bag_name" type="str" value="exp01_construction_ground_level"/>
+    <node pkg="fast_lio" type="fastlio_mapping" name="laserMapping" output="screen" required="true"/> 
 
 	<group if="$(arg rviz)">
-		<node launch-prefix="nice" pkg="rviz" type="rviz" name="rviz" args="-d $(find fast_lio)/rviz_cfg/loam_livox.rviz" />
+		<node launch-prefix="nice" pkg="rviz" type="rviz" name="rviz" args="-d $(find fast_lio)/rviz_cfg/loam_livox.rviz"/>
 	</group>
-
+	
+	<node pkg="rosbag" type="play" name="rosbag_play" args="/root/ros_ws/src/EE585_Hilti/bags/exp01_construction_ground_level.bag" output="screen" required="true"/>
 </launch>

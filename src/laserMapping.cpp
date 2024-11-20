@@ -82,7 +82,7 @@ double time_diff_lidar_to_imu = 0.0;
 mutex mtx_buffer;
 condition_variable sig_buffer;
 
-string root_dir = ROOT_DIR;
+string root_dir = ROOT_DIR, bag_name = "test";
 string map_file_path, lid_topic, imu_topic;
 
 double res_mean_last = 0.05, total_residual = 0.0;
@@ -795,6 +795,8 @@ int main(int argc, char** argv)
     nh.param<vector<double>>("mapping/extrinsic_T", extrinT, vector<double>());
     nh.param<vector<double>>("mapping/extrinsic_R", extrinR, vector<double>());
 
+    nh.param<string>("bag_name", bag_name, "");
+
     p_pre->lidar_type = lidar_type;
     cout<<"p_pre->lidar_type "<<p_pre->lidar_type<<endl;
     
@@ -989,16 +991,13 @@ int main(int argc, char** argv)
 
 
             std::ofstream ofs;
-            std::string pose_path = "/root/ros_ws/src/EE585_Hilti/Log/odom_result/pose_data.txt";
-
-            // std::string directory = "/root/ros_ws/src/EE585_Hilti/Log/odom_result";
-            // std::filesystem::create_directories(directory);
-            // std::string pose_path = directory + "/pose_data.txt";
+            std::string pose_path = "/root/ros_ws/src/EE585_Hilti/Log/odom_result/" + bag_name + ".txt";
 
             ofs.open(pose_path, std::ios::app);
             ofs<< std::fixed << std::setprecision(15) << lidar_end_time << " " << state_point.pos.x() << " " << state_point.pos.y() << " " << state_point.pos.z() << " " << geoQuat.x << " " << geoQuat.y << " " << geoQuat.z << " " << geoQuat.w << std::endl;
             ofs.close();
 
+            // cout << bag_name << endl;
 
             /*** Debug variables ***/
             if (runtime_pos_log)
