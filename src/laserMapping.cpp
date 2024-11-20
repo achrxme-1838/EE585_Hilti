@@ -871,8 +871,6 @@ int main(int argc, char** argv)
         ros::spinOnce();
         if(sync_packages(Measures)) 
         {
-
-            cout << pcd_save_en << endl;
             if (flg_first_scan)
             {
                 first_lidar_time = Measures.lidar_beg_time;
