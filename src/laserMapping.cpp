@@ -61,9 +61,13 @@
 #include <ikd-Tree/ikd_Tree.h>
 
 #define INIT_TIME           (0.1)
-#define LASER_POINT_COV     (0.001)
+// #define LASER_POINT_COV     (0.001)
+double LASER_POINT_COV = 0.001;
+
 #define MAXN                (720000)
 #define PUBFRAME_PERIOD     (20)
+
+float plane_threshold = 0.1f;
 
 /*** Time Log Variables ***/
 double kdtree_incremental_time = 0.0, kdtree_search_time = 0.0, kdtree_delete_time = 0.0;
@@ -278,6 +282,15 @@ void lasermap_fov_segment()
     kdtree_delete_time = omp_get_wtime() - delete_begin;
 }
 
+namespace fs = boost::filesystem;
+
+void cleanLine(std::string& line) {
+    line.erase(std::remove_if(line.begin(), line.end(), [](char c) {
+        return c == '[' || c == ']';
+    }), line.end());
+}
+
+
 void standard_pcl_cbk(const sensor_msgs::PointCloud2::ConstPtr &msg) 
 {
     mtx_buffer.lock();
@@ -297,6 +310,67 @@ void standard_pcl_cbk(const sensor_msgs::PointCloud2::ConstPtr &msg)
     s_plot11[scan_count] = omp_get_wtime() - preprocess_start_time;
     mtx_buffer.unlock();
     sig_buffer.notify_all();
+
+
+    ros::Time msg_time = msg->header.stamp;
+    double msg_time_sec = msg_time.toSec();
+    // std::cout << "Message timestamp: " << std::fixed << msg_time_sec << std::endl;
+
+    std::ostringstream file_name_stream;
+    file_name_stream << std::fixed << msg_time_sec << "000.txt";
+    std::string target_file_name = file_name_stream.str();
+    
+
+    // std::string pose_path = "/root/ros_ws/src/EE585_Hilti/Log/odom_result/" + bag_name + ".txt";
+    // std::string directory_path = "/root/ros_ws/src/txt_files/20241213_162617/1000/exp01_construction_ground_level";
+    std::string directory_path = "/root/ros_ws/src/txt_files/20241213_162617/1000/" + bag_name;
+
+    bool file_found = false;
+
+    double param_0=-1, param_1=-1, param_2=-1, param_3=-1, param_4=-1;
+
+    for (const auto& entry : fs::directory_iterator(directory_path)) {
+        if (entry.path().filename() == target_file_name) {
+            file_found = true;
+
+            std::ifstream file(entry.path().string());
+            if (file.is_open()) {
+                std::string line;
+                // std::cout << "Contents of file " << target_file_name << ":\n";
+                while (std::getline(file, line)) {
+                    // std::cout << line << std::endl;
+                    cleanLine(line);
+                    std::stringstream ss(line);
+                    std::string value;
+                    std::vector<double> params;
+
+                    while (std::getline(ss, value, ',')) {
+                        params.push_back(std::stod(value));
+                    }
+
+                    filter_size_surf_min = params[0];
+                    LASER_POINT_COV = params[1];
+                    // NUM_MATCH_POINTS = static_cast<int>(params[2]);
+                    filter_size_map_min = params[3];
+                    plane_threshold = params[4];
+
+                    // param_0 = params[0];
+                    // param_1 = params[1];
+                    // param_2 = params[2];
+                    // param_3 = params[3];
+                    // param_4 = params[4];
+
+                    // cout << param_0 << std::endl;
+
+                }
+                file.close();
+            } else {
+                std::cerr << "Error: Could not open file " << entry.path() << std::endl;
+            }
+            break;
+        }
+    }
+
 }
 
 double timediff_lidar_wrt_imu = 0.0;
@@ -678,7 +752,11 @@ void h_share_model(state_ikfom &s, esekfom::dyn_share_datastruct<double> &ekfom_
 
         VF(4) pabcd;
         point_selected_surf[i] = false;
-        if (esti_plane(pabcd, points_near, 0.1f))
+
+
+
+        // if (esti_plane(pabcd, points_near, 0.1f))
+        if (esti_plane(pabcd, points_near, plane_threshold))
         {
             float pd2 = pabcd(0) * point_world.x + pabcd(1) * point_world.y + pabcd(2) * point_world.z + pabcd(3);
             float s = 1 - 0.9 * fabs(pd2) / sqrt(p_body.norm());
@@ -882,6 +960,8 @@ int main(int argc, char** argv)
             }
 
             double t0,t1,t2,t3,t4,t5,match_start, solve_start, svd_time;
+
+            // std::cout << std::fixed << Measures.lidar_end_time << std::endl;
 
             match_time = 0;
             kdtree_search_time = 0.0;
